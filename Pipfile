@@ -8,6 +8,8 @@ verify_ssl = true
 [packages]
 zmq = "*"
 argparse = "*"
+imutils = "*"
+imagezmq = "*"
 
 [requires]
 python_version = "3.7"

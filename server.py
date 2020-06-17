@@ -1,38 +1,27 @@
+from imagezmq import imagezmq
+import imutils
+import cv2
 import argparse
 import sys
 import zmq
 
-# construct the argument parser and parse the arguments
-ap = argparse.ArgumentParser()
-ap.add_argument("-p", "--server-port",  required=True, type=str, help="server's port")
-args = vars(ap.parse_args())
-
-# create a container for all sockets in this process
-context = zmq.Context()
-
-# establish a socket for incoming connections
-print("[INFO] creating socket...")
-socket = context.socket(zmq.REP)
-socket.bind("tcp://*:{}".format(args["server_port"]))
+imageHub = imagezmq.ImageHub()
 
 while True:
-  # receive a message, decode it, and convert to lowercase
-  message = socket.recv().decode("ascii").lower()
-  print("[INFO] received message `{}`".format(message))
+  (rpiName, frame) = imageHub.recv_image()
+  imageHub.send_reply(b'OK')
+  print("[INFO] receiving data from {}...".format(rpiName))
 
-  # check if the correct message, *raspberry*, is received and then
-  # send return message message accordingly
-  if "raspberry" in message:
-    print("[INFO] correct message, so sending 'correct'")
-    returnMessage = "correct"
-    socket.send(returnMessage.encode("ascii"))
-  elif message == "quit":
-    returnMessage = "quitting server..."
-    socket.send(returnMessage.encode("ascii"))
-    print("[INFO] terminating the server")
-    sys.exit(0)
-  else:
-    print("[INFO] incorrect message, so requesting again")
-    returnMessage = "try again!"
-    socket.send(returnMessage.encode("ascii"))
+  frame = imutils.resize(frame, width=400)
+
+  cv2.putText(frame, rpiName, (10, 25),
+    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+  
+  cv2.imshow(rpiName, frame)
+  key = cv2.waitKey(1) & 0xFF
+
+  if key == ord("q"):
+    break
+
+cvs.destroyAllWindows()
 
