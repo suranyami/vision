@@ -9,13 +9,11 @@ import time
 ap = argparse.ArgumentParser()
 ap.add_argument("-s", "--server-ip", required=True, type=str,
   help="ip address of the server to which the client will connect")
-ap.add_argument("-p", "--server-port", required=True,
-  type=str, help="server's port")
 args = vars(ap.parse_args())
 
 # initialize the ImageSender object with the socket address of the server
 sender = imagezmq.ImageSender(
-  connect_to="tcp://{}:{}".format(args["server_ip"], args["server_port"]))
+  connect_to="tcp://{}:5555".format(args["server_ip"]))
 
 rpiName = socket.gethostname()
 
